@@ -53,13 +53,6 @@ const mouse = {
     y: canvas.height / 2
 };
 
-
-canvas.addEventListener('mousemove', (event) => {
-    mouse.x = event.clientX;
-    mouse.y = event.clientY;
-});
-
-
 class Ball {
     constructor(x, y, dx, dy, radius, color) {
         this.x = x;
