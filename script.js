@@ -1,8 +1,51 @@
+const backgroundCanvas = document.getElementById('backgroundCanvas');
+const bgCtx = backgroundCanvas.getContext('2d');
+backgroundCanvas.width = window.innerWidth;
+backgroundCanvas.height = window.innerHeight;
 
-const canvas = document.getElementById('rajdeep');
+const canvas = document.getElementById('bouncingBallsCanvas');
 const ctx = canvas.getContext('2d');
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
+class Star {
+    constructor(x, y, radius, speed) {
+        this.x = x;
+        this.y = y;
+        this.radius = radius;
+        this.speed = speed;
+    }
+
+    draw() {
+        bgCtx.save();
+        bgCtx.beginPath();
+        bgCtx.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false);
+        bgCtx.fillStyle = 'white';
+        bgCtx.shadowBlur = 5;
+        bgCtx.shadowColor = 'white';
+        bgCtx.fill();
+        bgCtx.closePath();
+        bgCtx.restore();
+    }
+
+    update() {
+        this.y += this.speed;
+        if (this.y > backgroundCanvas.height) {
+            this.y = 0 - this.radius;
+            this.x = Math.random() * backgroundCanvas.width;
+        }
+        this.draw();
+    }
+}
+
+
+const stars = [];
+for (let i = 0; i < 100; i++) {
+    const radius = Math.random() * 1.5;
+    const x = Math.random() * backgroundCanvas.width;
+    const y = Math.random() * backgroundCanvas.height;
+    const speed = Math.random() * 0.5 + 0.2;
+    stars.push(new Star(x, y, radius, speed));
+}
 
 
 const mouse = {
@@ -38,7 +81,7 @@ class Ball {
         ctx.beginPath();
         ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false);
         ctx.fillStyle = gradient;
-        ctx.shadowBlur = 40 * this.glowIntensity; 
+        ctx.shadowBlur = 60 * this.glowIntensity; // Adjust shadow blur for more glow
         ctx.shadowColor = this.color;
         ctx.fill();
         ctx.closePath();
@@ -53,6 +96,13 @@ class Ball {
             this.dy = -this.dy;
         }
 
+        
+        const attractionStrength = 0.05;
+        const dx = mouse.x - this.x;
+        const dy = mouse.y - this.y;
+        this.dx += dx * attractionStrength;
+        this.dy += dy * attractionStrength;
+
         this.x += this.dx;
         this.y += this.dy;
 
@@ -65,6 +115,7 @@ class Ball {
                 resolveCollision(this, balls[i]);
                 this.color = randomColor();
                 balls[i].color = randomColor();
+                
             }
         }
 
@@ -152,7 +203,12 @@ for (let i = 0; i < 50; i++) {
 
 
 function animate() {
-    ctx.fillStyle = 'rgba(0, 0, 0, 0.1)'; 
+    bgCtx.clearRect(0, 0, backgroundCanvas.width, backgroundCanvas.height);
+    stars.forEach(star => {
+        star.update();
+    });
+
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.1)'; // Trail effect with slight transparency
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     balls.forEach(ball => {
